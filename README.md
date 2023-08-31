@@ -40,5 +40,5 @@ the scenarios to be optimized.
 
 ## Adequacy assessment
 
-The results of the adequacy assessment for the exemplary scenarios are available
-in [this](remix/results/adequacy.ipynb) jupyter notebook.
+Exemplary results of the adequacy assessment for the scenarios are available in
+[this](remix/results.ipynb) jupyter notebook.
