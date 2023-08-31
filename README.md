@@ -1,7 +1,7 @@
-# Destination Earth Use Case Energy System: Pilot Implementation
+# Destination Earth Use Case Energy Systems: Pilot Implementation
 
 This is the pilot implementation of the REMix model instance in the Destination
-Earth Use Case Energy System contract. The pilot consists of two parts:
+Earth Use Case Energy Systems contract. The pilot consists of two parts:
 
 1. data collection and preprocessing
 2. model building and solving
