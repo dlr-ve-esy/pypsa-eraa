@@ -57,7 +57,7 @@ for the adequacy assessment.
     cd ../remix
     snakemake --cores 10
 
-![REMix workflow](ENTSOE/workflow.png)
+![REMix workflow](remix/workflow.png)
 
 ## Adequacy assessment
 
