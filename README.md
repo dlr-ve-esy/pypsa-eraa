@@ -39,6 +39,8 @@ the respective relevant scenario data from them. To run the data collection and
 preparation workflow use
 
     cd ENTSOE
+    snakemake --cores 1 download
+    snakemake --cores 1 extract_ntc extract_demand extract_climate_data
     snakemake --cores 10
 
 ### Model building and solving
