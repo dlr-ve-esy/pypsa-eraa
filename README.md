@@ -43,6 +43,8 @@ preparation workflow use
     snakemake --cores 1 extract_ntc extract_demand extract_climate_data
     snakemake --cores 10
 
+![Preprocessing workflow](ENTSOE/workflow.png)
+
 ### Model building and solving
 
 The model building reads the prepared data and reformats them in a way that is
@@ -54,6 +56,8 @@ for the adequacy assessment.
 
     cd ../remix
     snakemake --cores 10
+
+![REMix workflow](ENTSOE/workflow.png)
 
 ## Adequacy assessment
 
