@@ -1,0 +1,7 @@
+**/*.nc
+**/*ipynb_checkpoints
+**/*.log
+**/*nohup.out
+**/*.png
+**/Untitled*.ipynb
+**/.snakemake
