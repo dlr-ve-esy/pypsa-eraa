@@ -43,7 +43,7 @@ preparation workflow use
     snakemake --cores 1 extract_ntc extract_demand extract_climate_data
     snakemake --cores 10
 
-![Preprocessing workflow](ENTSOE/workflow.png)
+![Preprocessing workflow](pilot/ENTSOE/workflow.png)
 
 ### Model building and solving
 
@@ -57,10 +57,10 @@ for the adequacy assessment.
     cd ../remix
     snakemake --cores 10
 
-![REMix workflow](remix/workflow.png)
+![REMix workflow](pilot/remix/workflow.png)
 
 ## Adequacy assessment
 
 The adequacy assessment is not part of the automatic workflow. Exemplary results
 of the adequacy assessment for the scenarios are available in
-[this](remix/results.ipynb) jupyter notebook.
+[this](pilot/remix/results.ipynb) jupyter notebook.
