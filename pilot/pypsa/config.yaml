@@ -1,0 +1,84 @@
+scenario:
+    target_years: [2030]
+    simulation_years: [2010]
+
+io:
+    databasedir: '/srv/ES2050/ensym/DestinE/ERAA/'
+
+transmission:
+    link_types: ['HVAC', 'HVDC']
+
+generation:
+    generator_types: ['Nuclear', 'Lignite', 'Hard Coal', 'Oil', 'Gas', 'Wind Onshore', 'Wind Offshore', 'Solar (Photovoltaic)', 'Solar (Thermal)', 'Hydro - Run of River (Turbine)', 'Others renewable', 'Biofuel', 'Others non-renewable', 'Demand Side Response Capacity']
+    fuel_types:
+        Nuclear: 'Nuclear/-'
+        Hard Coal: 'Hard coal/new'
+        Lignite: 'Lignite/new'
+        Gas: 'Gas/OCGT new'
+        Oil shale: 'Oil shale/new' # replace Oil by Oil shale in following DataFrames
+
+storage:
+    storage_types: ['Hydro - Pump Storage Open Loop', 'Hydro - Pump Storage Closed Loop', 'Batteries', 'Hydro - Pondage', 'Hydro - Reservoir']
+    storage_efficiencies:
+        Batteries:
+            store: 0.9
+            dispatch: 1.0
+        Hydro - Reservoir:
+            store: 0.0
+            dispatch: 1.0
+        Hydro - Pump Storage Closed Loop:
+            store: 0.75
+            dispatch: 1.0
+        Hydro - Pump Storage Open Loop:
+            store: 0.75
+            dispatch: 1.0
+        Hydro - Pondage:
+            store: 0.0
+            dispatch: 1.0
+    soc_initial: # in %
+        Batteries: 50
+
+carriers_short_names:
+    Hydro - Pump Storage Closed Loop (Pumping): CLPHS
+    Hydro - Pump Storage Open Loop (Pumping): OLPHS
+    Oil: oil
+    Biofuel: biofuel
+    Solar (Thermal): solar thermal
+    Batteries (Injection): battery
+    Batteries (Offtake): battery
+    Demand Side Response capacity: DSR
+    Hydro - Pump Storage Closed Loop (Turbine): CLPHS
+    Others renewable: other RE
+    Hard Coal: coal
+    Lignite: lignite
+    Others non-renewable: other conventional
+    Hydro - Run of River (Turbine): ror
+    Run of River: ror
+    Hydro - Run of River & Pondage (Turbine): ror
+    Hydro - Pump Storage Open Loop (Turbine): OLPHS
+    Pump Storage Open Loop: OLPHS
+    Wind Offshore: offwind
+    Hydro - Reservoir (Turbine): hydro
+    Hydro - Pondage: pondage
+    Hydro - Pondage (Turbine): pondage
+    Pondage: pondage
+    Hydro - Reservoir: hydro
+    Reservoir: hydro
+    Hydro - Pump Storage Open Loop: OLPHS
+    Hydro - Pump Storage Closed Loop: CLPHS
+    Pump Storage Closed Loop: CLPHS
+    Batteries: battery
+    Nuclear: nuclear
+    Gas: gas
+    Wind Onshore: onwind
+    Solar (Photovoltaic): solar
+    Solar (Thermal): CSP
+
+solve:
+    lopf_kwargs:
+        solver_name: 'glpk'
+        #keep_files:
+        #solver_dir
+    solver_options:
+        #logPath: 'solver.log'
+        #solver_options:

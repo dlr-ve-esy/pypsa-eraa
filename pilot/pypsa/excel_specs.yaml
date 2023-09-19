@@ -1,0 +1,46 @@
+link_specs:
+    file: '/srv/data/enmet/brschy/DestinE/data/PECD-2022/Transfer capacities/Transfer Capacities_ERAA2022_TY2030_pandas_readable.xlsx' #needs to be adopted when target year changes...
+    firstcol: B
+    lastcol:
+        HVAC: FY
+        HVDC: BR
+    kwargs:
+        header: 0
+        index_col: 0
+        nrows: 5
+
+link_p_max:
+    kwargs:
+        index_col: [0,1]
+        skiprows: 8
+        header: None
+
+capacities:
+    file: '/srv/data/enmet/brschy/DestinE/data/PECD-2022/ERAA 2022 PEMMDB National Estimates.xlsx'
+
+loads:
+    kwargs:
+        skiprows: 10
+        index_col: [0,1]
+        header: 0
+        engine: 'openpyxl'
+
+hydro:
+    directory: '/srv/data/enmet/brschy/DestinE/data/PECD-2022/Climate Data/Hydro Inflows/'
+    ror:
+        kwargs:
+            skiprows: 12
+            header: 0
+            usecols: 'Q:BA'
+            index_col: 0
+    pondage:
+        kwargs:
+            skiprows: 12
+            header: 0
+            usecols: 'Q:BA'
+            index_col: 0
+
+vre:    
+    kwargs:
+         skiprows: 10
+         index_col: [0,1]

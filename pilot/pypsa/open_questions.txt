@@ -1,0 +1,15 @@
+Questions to Matthias:
+
+- How to handle:
+    - UA02 (appears in NTC's but not in Loads/generation capacities)
+    - ITVI
+    - PLE0
+    - ... buses appearing in NTY and/or National Estimates but which are no bidding zones
+- What to do with 'hidden' columns (C:W) in NTC Excel file?
+- Where can maintanance profiles be found (for non-renewables)?
+- How to derive scenarios for forced outages?
+- Which sheets should be used in Climate Data excel? For DE (e.g.) DE01 - DE07 exist, but Germany only has one bidding zone (DE00)
+- What are poles? How should different number of poles be considered in the modelling?
+- How to handle duplicated links in Transfer Capacities.xlsx?
+- ROR time series for CH00 look weird?!
+- Where can installed charge/discharge capacities and storage sizes for out-of-market (DSR) batteries be found?

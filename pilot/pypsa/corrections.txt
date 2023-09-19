@@ -1,0 +1,2 @@
+- timestamp in BAT_2030.xlsx, EV_2030.xlsx, HP_2030.xlsx on sheet AT00
+- column names in Demand_TimeSeries_2030_NationalTrends_without_bat.xlsx on sheet TR00 (start in year 1981 instead of 1982)
