@@ -6,7 +6,7 @@ MODEL_PATH = config['model']
 TARGETYEARS = config['scenario']['target_years']
 SIMULATIONYEARS = config['scenario']['climatic_years']
 CLIMATICDATASOURCES = config['climatic_data_sources']
-ALL_CLIMATICYEARS = range(config['scenario']['climatic_year_from'], config['scenario']['climatic_year_to'] + 1)
+ALL_CLIMATICYEARS = range(config['scenario']['climatic_year_from'], config['scenario']['climatic_year_to'])
 
 DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
 PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
