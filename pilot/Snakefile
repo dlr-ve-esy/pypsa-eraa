@@ -6,9 +6,12 @@ MODEL_PATH = config['model']
 TARGETYEARS = config['scenario']['target_years']
 SIMULATIONYEARS = config['scenario']['climatic_years']
 CLIMATICDATASOURCES = config['climatic_data_sources']
+ALL_CLIMATICYEARS = range(config['scenario']['climatic_year_from'], config['scenario']['climatic_year_to'] + 1)
 
 DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
 PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
+PECD_PATH = RESOURCE_PATH + "climatic/PECD/"
 
 include: PEMMDB_PATH + "prepare.smk"
+include: PECD_PATH + "prepare.smk"
 include: MODEL_PATH + "/run.smk"
