@@ -1,0 +1,14 @@
+configfile: "main_config.yaml"
+
+RESOURCE_PATH = "resources/"
+MODEL_PATH = config['model']
+
+TARGETYEARS = config['scenario']['target_years']
+SIMULATIONYEARS = config['scenario']['climatic_years']
+CLIMATICDATASOURCES = config['climatic_data_sources']
+
+DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
+PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
+
+include: PEMMDB_PATH + "prepare.smk"
+include: MODEL_PATH + "/run.smk"
