@@ -1,12 +1,10 @@
-configfile: "config.yaml"
+configfile: "pypsa_config.yaml"
 
 TARGETYEARS = config['scenario']['target_years']
 SIMULATIONYEARS = config['scenario']['simulation_years']
 
 rule evaluate_adequacy:
     input: expand('results/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS)
-
-# rule retrieve_data:
 
 rule prepare_networks:
     output:
