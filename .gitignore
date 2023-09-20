@@ -5,3 +5,4 @@
 **/*.png
 **/Untitled*.ipynb
 **/.snakemake
+pilot/resources/*
