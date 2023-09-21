@@ -13,18 +13,16 @@ def initialise_with_links(config):
     TY = snakemake.wildcards[0]
     simulation_year = snakemake.wildcards[1]
     
-    basedir = config['io']['databasedir']+f'scenario_{TY}_{simulation_year}/'
-    
-    bus_locations = pd.read_csv(basedir+'bus_locations.csv', header=0, index_col=0)
+    bus_locations = pd.read_csv(snakemake.input['bus_locations'], header=0, index_col=0)
     network.madd('Bus', bus_locations.index, x=bus_locations.x, y=bus_locations.y)
     
     for link_type in config['transmission']['link_types']:
     
         network.add('Carrier', link_type)
     
-        link_specs = pd.read_csv(basedir+f'links_technical_{link_type}_{TY}.csv', header=0, index_col=0)
+        link_specs = pd.read_csv(snakemake.input[f'link_specs_{link_type}'], header=0, index_col=0)
     
-        link_p_max_pu = pd.read_csv(basedir+f'links_cf_timeseries_{link_type}_{TY}.csv', header=0, index_col=0).reindex(columns=link_specs.index, fill_value=1.)
+        link_p_max_pu = pd.read_csv(snakemake.input[f'link_p_max_pu_{link_type}'], header=0, index_col=0).reindex(columns=link_specs.index, fill_value=1.)
         link_p_min_pu = -link_p_max_pu[link_specs.index[link_specs.bidirectional]]
         
         snapshots = pd.DatetimeIndex(pd.date_range(start=f'{simulation_year}-01-01 00:00:00', freq='H', periods=link_p_max_pu.shape[0], name='snapshots'))

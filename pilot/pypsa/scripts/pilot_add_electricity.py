@@ -111,18 +111,19 @@ def define_stores(network, config, capacities=None, sus_energy=None):
 def add_electricity(network, config):
 
     ### config from configfile
-    TY = snakemake.wildcards[0] #config['scenario']['target_year']    
-    simulation_year = int(snakemake.wildcards[1]) #config['scenario']['simulation_year']
-    scenario = f'National estimates {TY}'
-    basedir = config['io']['databasedir']+f'scenario_{TY}_{simulation_year}/'
+#    TY = snakemake.wildcards[0] #config['scenario']['target_year']    
+#    simulation_year = int(snakemake.wildcards[1]) #config['scenario']['simulation_year']
+#    scenario = f'National estimates {TY}'
+#    basedir_static = snakemake.params.basedir_static
+#    basedir_climatic = snakemake.params.basedir_climatic
     
     ### read input files
-    capacities = pd.read_csv(basedir+f'generation_technical_{TY}.csv', header=0, index_col=0)
+    capacities = pd.read_csv(snakemake.input.generation_technical, header=0, index_col=0)#pd.read_csv(basedir_static+f'generation_technical.csv', header=0, index_col=0)
     capacities["technology"] = capacities["technology"].str.strip()
-    sus_energy = pd.read_csv(basedir+f'storage_technical_{TY}.csv', header=0, index_col=0)
+    sus_energy = pd.read_csv(snakemake.input.storage_technical, header=0, index_col=0)#pd.read_csv(basedir_static+f'storage_technical.csv', header=0, index_col=0)
 
     ### add network components
-    define_loads(network, dem_f=basedir+f'demand_timeseries_{TY}.csv')
+    define_loads(network, dem_f=snakemake.input.demand_timeseries)
     define_generators(network, config, capacities)
     define_stores(network, config, **{
         'capacities': capacities,
@@ -135,7 +136,7 @@ def add_electricity(network, config):
 if __name__ == "__main__":
 
     ### add electricity and export network
-    network = pypsa.Network(snakemake.input[0])
+    network = pypsa.Network(snakemake.input.network)
     network_with_elec = add_electricity(network, snakemake.config)
     network_with_elec.export_to_netcdf(snakemake.output[0])
 

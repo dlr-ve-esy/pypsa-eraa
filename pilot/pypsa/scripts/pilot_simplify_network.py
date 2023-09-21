@@ -64,8 +64,7 @@ def simplify_network(network):
         'e_max_pu': "capacity_weighted_average",
         'e_min_pu': "capacity_weighted_average",
         'e_initial': "sum",
-        'e_nom': 'sum'
-        
+        'e_nom': 'sum'    
     }
 
     network.loads.carrier = 'total_demand'
@@ -89,10 +88,6 @@ def simplify_network(network):
     return(n_clustered)
 
 if __name__ == "__main__":
-
-    TY = snakemake.wildcards[0]
-    simulation_year = int(snakemake.wildcards[1])
-    scenario = f'National estimates {TY}'
 
     network = pypsa.Network(snakemake.input[0])
 

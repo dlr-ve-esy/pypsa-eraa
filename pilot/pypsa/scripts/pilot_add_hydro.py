@@ -10,12 +10,11 @@ from pypsa.descriptors import get_switchable_as_dense as as_dense
 
 def add_inflows(network, config):
 
-    TY = config['scenario']['target_years'][0]
-    simulation_year = config['scenario']['simulation_years'][0]
+    simulation_year = snakemake.wildcards[1]
     short_names = config['carriers_short_names']
-    basedir = config['io']['databasedir']+f'scenario_{TY}_{simulation_year}/'
+    basedir = snakemake.params.basedir
 
-    inflow = pd.read_csv(basedir+f'hydro_inflows_{simulation_year}.csv', header=0, index_col=0)
+    inflow = pd.read_csv(snakemake.input.hydro_inflow_timeseries, header=0, index_col=0)
 
     hydro_gens = pd.DataFrame(index=inflow.columns)
     hydro_gens['carrier'] = [c.split(' - ')[1] for c in inflow.columns]
@@ -45,9 +44,9 @@ def add_hydro_constraints(network, config):
     TY = config['scenario']['target_years'][0]
     simulation_year = config['scenario']['simulation_years'][0]
     short_names = config['carriers_short_names']
-    basedir = config['io']['databasedir']+f'scenario_{TY}_{simulation_year}/'
+    basedir = snakemake.params.basedir
 
-    hydro_files = sorted(glob.glob(basedir+f'hydro_uniform_*_{simulation_year}.csv'))
+    hydro_files = sorted(glob.glob(basedir+f'hydro_uniform_*.csv'))
 
     for hydro_f in hydro_files:
         limits = pd.read_csv(hydro_f, index_col=0, header=0)
@@ -62,9 +61,9 @@ def add_hydro_constraints(network, config):
         limits.index = network.snapshots
         limits.drop(limits.columns[~limits.columns.isin(network.stores.index)], axis=1, inplace=True)
     
-        constraint = hydro_f.split('_')[-2]
+        constraint = hydro_f.split('_')[-1][:-4]
     
-        if constraint == 'Maximum Generated energy GWh per week':
+        if constraint == 'Maximum Generated energy MWh per week':
             ### Limits have been equally distributed to hours within week
             ### set p_max_pu of dispatching link
     
@@ -89,7 +88,7 @@ def add_hydro_constraints(network, config):
             
             network.links_t.p_max_pu[disp_links] = max_disp_pu.clip(upper=1.)
     
-        elif constraint == 'Maximum Pumped Energy GWh per week':
+        elif constraint == 'Maximum Pumped Energy MWh per week':
             ### Limits have been equally distributed to hours within week
             ### set p_max_pu of storing link
     
@@ -114,11 +113,11 @@ def add_hydro_constraints(network, config):
 
             network.links_t.p_max_pu[store_links] = max_store_pu.clip(upper=1.)
     
-        elif constraint == 'Maximum Reservoir level, historical (ratio) ':
+        elif constraint == 'Maximum Reservoir level, historical (ratio)':
             ### set e_max_pu of store
             network.stores_t.e_max_pu[limits.columns] = limits
     
-        elif constraint == 'Minimum Generated energy GWh per week':
+        elif constraint == 'Minimum Generated energy MWh per week':
             ### Limits have been equally distributed to hours within week
             ### set p_min_pu of dispatching link
     
@@ -144,7 +143,7 @@ def add_hydro_constraints(network, config):
             
             network.links_t.p_min_pu[disp_links] = min_disp_pu.clip(upper=1.)
     
-        elif constraint == 'Minimum Pumped energy GWh per week':
+        elif constraint == 'Minimum Pumped energy MWh per week':
             ### Limits have been equally distributed to hours within week
             ### set p_min_pu of storing link
     
@@ -169,7 +168,7 @@ def add_hydro_constraints(network, config):
             
             network.links_t.p_min_pu[store_links] = min_store_pu.clip(upper=1.)
     
-        elif constraint == 'Minimum Reservoir level, historical (ratio) ':
+        elif constraint == 'Minimum Reservoir level, historical (ratio)':
             ### set e_min_pu of store
             network.stores_t.e_min_pu[limits.columns] = limits
 
@@ -178,7 +177,7 @@ def add_hydro_constraints(network, config):
             network.stores.loc[limits.columns, 'e_initial_per_period'] = True
             network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
     
-        elif constraint == 'Minimum Reservoir level, technical (ratio) ':
+        elif constraint == 'Minimum Reservoir level, technical (ratio)':
             ### set e_min_pu of store
             network.stores_t.e_min_pu[limits.columns] = limits
 
@@ -187,7 +186,7 @@ def add_hydro_constraints(network, config):
             network.stores.loc[limits.columns, 'e_initial_per_period'] = True
             network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
     
-        elif constraint == 'Reservoir level at beginning of week (ratio) ':
+        elif constraint == 'Reservoir level at beginning of week (ratio)':
             ### e_max_pu = e_min_pu at beginning of week
             e_min_pu = limits.fillna(0.)
             e_max_pu = limits.fillna(1.)
@@ -219,7 +218,7 @@ def check_consistency(network, strategy='min_over_max'):
 if __name__ == "__main__":
 
     ### add electricity and export network
-    network = pypsa.Network(snakemake.input[0])
+    network = pypsa.Network(snakemake.input.network)
     add_inflows(network, snakemake.config)
     add_hydro_constraints(network, snakemake.config)
     check_consistency(network)

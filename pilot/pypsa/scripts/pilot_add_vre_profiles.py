@@ -7,12 +7,9 @@ import yaml
 
 def read_vre_p_max_pu(network, config):
 
-    TY = snakemake.wildcards[0]
-    simulation_year = int(snakemake.wildcards[1])
     short_names = config['carriers_short_names']
-    basedir = config['io']['databasedir']+f'scenario_{TY}_{simulation_year}/'
 
-    vre_p_max_pu = pd.read_csv(basedir+f'generation_vre_{simulation_year}.csv', header=0, index_col=0)
+    vre_p_max_pu = pd.read_csv(snakemake.input.generation_vre_timeseries, header=0, index_col=0)
 
     vre_gens = pd.DataFrame(index=vre_p_max_pu.columns)
     vre_gens['carrier'] = [c.split(' - ')[1] for c in vre_p_max_pu.columns]
@@ -28,12 +25,9 @@ def read_vre_p_max_pu(network, config):
 ### add inflow to run of river plants
 def read_inflow(network, config):
 
-    TY = snakemake.wildcards[0]
-    simulation_year = int(snakemake.wildcards[1])
     short_names = config['carriers_short_names']
-    basedir = config['io']['databasedir']+f'scenario_{TY}_{simulation_year}/'
     
-    inflow = pd.read_csv(basedir+f'hydro_inflows_{simulation_year}.csv', header=0, index_col=0)
+    inflow = pd.read_csv(snakemake.input.hydro_inflow_timeseries, header=0, index_col=0)
 
     hydro_gens = pd.DataFrame(index=inflow.columns)
     hydro_gens['carrier'] = [c.split(' - ')[1] for c in inflow.columns]
@@ -60,7 +54,7 @@ def add_generators_p_max_pu(network, config):
 
 if __name__ == "__main__":
 
-    network = pypsa.Network(snakemake.input[0])
+    network = pypsa.Network(snakemake.input.network)
     network.name = 'DestinE Pilot with VRE profiles'
 
     add_generators_p_max_pu(network, snakemake.config)

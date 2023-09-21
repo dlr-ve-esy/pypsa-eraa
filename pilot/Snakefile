@@ -15,3 +15,8 @@ PECD_PATH = RESOURCE_PATH + "climatic/PECD/"
 include: PEMMDB_PATH + "prepare.smk"
 include: PECD_PATH + "prepare.smk"
 include: MODEL_PATH + "/run.smk"
+
+if config['model'] == 'pypsa':
+
+    rule evaluate_adequacy:
+        input: expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS)

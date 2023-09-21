@@ -1,5 +1,5 @@
 scenario:
-    climatic_years: [2010]
+    climatic_years: [2000]
     target_years: [2027, 2030]
     climatic_year_from: 1982
     climatic_year_to: 2016
@@ -8,4 +8,4 @@ climatic_data_sources: [
     "pecd", "reading", "ninja"
 ]
 
-model: "remix"
+model: "pypsa"
