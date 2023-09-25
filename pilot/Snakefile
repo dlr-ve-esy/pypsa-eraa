@@ -1,22 +1,30 @@
 configfile: "main_config.yaml"
 
-RESOURCE_PATH = "resources/"
-MODEL_PATH = config['model']
-
 TARGETYEARS = config['scenario']['target_years']
 SIMULATIONYEARS = config['scenario']['climatic_years']
 CLIMATICDATASOURCES = config['climatic_data_sources']
 ALL_CLIMATICYEARS = range(config['scenario']['climatic_year_from'], config['scenario']['climatic_year_to'])
 
+RESOURCE_PATH = "resources/"
+MODEL_PATH = config['model']
 DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
 PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
-PECD_PATH = RESOURCE_PATH + "climatic/PECD/"
+PECD_PATH = RESOURCE_PATH + 'climatic/PECD/'
 
 include: PEMMDB_PATH + "prepare.smk"
-include: PECD_PATH + "prepare.smk"
+include: PECD_PATH + 'prepare.smk'
 include: MODEL_PATH + "/run.smk"
+include: RESOURCE_PATH + 'climatic/retrieve_climate_data.smk'
+
+### build pilot(s) with PEEMDB + PECD and collect additional data sources (if applicable)
+if CLIMATICDATASOURCES:
+    inputs = [expand(RESOURCE_PATH + "climatic/{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS)]
+else:
+    inputs = []
 
 if config['model'] == 'pypsa':
-
-    rule evaluate_adequacy:
-        input: expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS)
+    inputs.append(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
+    
+rule run_all:
+    input: inputs
+            

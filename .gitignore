@@ -5,4 +5,8 @@
 **/*.png
 **/Untitled*.ipynb
 **/.snakemake
-pilot/resources/*
+pilot/resources/climatic/*/CY*
+pilot/resources/climatic/*/raw
+pilot/resources/PEMMDB/TY*
+pilot/resources/climatic/PECD/TY*
+pilot/resources/raw/*
