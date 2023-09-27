@@ -5,7 +5,8 @@ scenario:
     climatic_year_to: 2016
 
 climatic_data_sources: [ # climatic data source additionally to PECD \in ['Reading', 'ninja']
-    "ninja" #, "ninja"
+    "ninja",
+    'Reading'
 ]
 
 model: "pypsa"
