@@ -24,7 +24,13 @@ else:
 
 if config['model'] == 'pypsa':
     inputs.append(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
-    
+
 rule run_all:
     input: inputs
-            
+
+rule prepare_all:
+    input:
+        inputs,
+        expand(PECD_PATH + "TY{TY}/CY{CY}/hydro_inflow_timeseries.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
+        expand(PECD_PATH + "TY{TY}/CY{CY}/demand_timeseries.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
+        expand(PECD_PATH + "TY{TY}/CY{CY}/generation_vre_timeseries.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
