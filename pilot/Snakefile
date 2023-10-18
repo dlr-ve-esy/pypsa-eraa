@@ -42,3 +42,8 @@ rule prepare_remix_model:
     input:
         inputs,
         expand(MODEL_PATH + "modeldata/TY{TY}/CY{CY}/final_model/converter_coefficient.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
+
+rule remix_hydro_constraints:
+    input:
+        inputs,
+        expand(MODEL_PATH + "modeldata/TY{TY}/CY{CY}/hyrdo_constraints/storage_levelprofile.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
