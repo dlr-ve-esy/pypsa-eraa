@@ -22,14 +22,6 @@ if CLIMATICDATASOURCES:
 else:
     inputs = []
 
-if config['model'] == 'pypsa':
-    inputs.append(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
-
-if config['model'] == 'remix':
-    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/remix_cba.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS))
-
-rule run_all:
-    input: inputs
 
 rule preprocess_input_data:
     input:
@@ -47,3 +39,12 @@ rule remix_hydro_constraints:
     input:
         inputs,
         expand(MODEL_PATH + "modeldata/TY{TY}/CY{CY}/hyrdo_constraints/storage_levelprofile.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
+
+if config['model'] == 'pypsa':
+    inputs.append(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
+
+if config['model'] == 'remix':
+    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/remix_cba.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS))
+
+rule run_all:
+    input: inputs
