@@ -1,4 +1,5 @@
 configfile: "main_config.yaml"
+inputs = []
 
 TARGETYEARS = config['scenario']['target_years']
 SIMULATIONYEARS = config['scenario']['climatic_years']
@@ -18,10 +19,17 @@ include: RESOURCE_PATH + 'climatic/retrieve_climate_data.smk'
 
 ### build pilot(s) with PEEMDB + PECD and collect additional data sources (if applicable)
 if CLIMATICDATASOURCES:
-    inputs = [expand(RESOURCE_PATH + "climatic/{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS)]
-else:
-    inputs = []
+    inputs.extend(expand(RESOURCE_PATH + "climatic/{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS))
 
+if config['model'] == 'pypsa':
+    inputs.extend(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
+
+if config['model'] == 'remix':
+    inputs.extend(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/commodity_balance_annual.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
+    inputs.extend(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/slack_commodity_balance.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
+
+rule run_all:
+    input: inputs
 
 rule preprocess_input_data:
     input:
@@ -39,13 +47,3 @@ rule remix_hydro_constraints:
     input:
         inputs,
         expand(MODEL_PATH + "modeldata/TY{TY}/CY{CY}/hyrdo_constraints/storage_levelprofile.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
-
-if config['model'] == 'pypsa':
-    inputs.append(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
-
-if config['model'] == 'remix':
-    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/commodity_balance_annual.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
-    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/slack_commodity_balance.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
-
-rule run_all:
-    input: inputs
