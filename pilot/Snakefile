@@ -44,7 +44,8 @@ if config['model'] == 'pypsa':
     inputs.append(expand('pypsa/networks/pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
 
 if config['model'] == 'remix':
-    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/remix_cba.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS))
+    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/commodity_balance_annual.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
+    inputs.append(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/slack_commodity_balance.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
 
 rule run_all:
     input: inputs
