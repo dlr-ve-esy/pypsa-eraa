@@ -10,7 +10,6 @@ from pypsa.descriptors import get_switchable_as_dense as as_dense
 
 def add_inflows(network, config):
 
-    simulation_year = snakemake.wildcards[1]
     short_names = config['carriers_short_names']
     basedir = snakemake.params.basedir
 
@@ -41,8 +40,6 @@ def add_inflows(network, config):
 
 def add_hydro_constraints(network, config):
 
-    TY = config['scenario']['target_years'][0]
-    simulation_year = config['scenario']['simulation_years'][0]
     short_names = config['carriers_short_names']
     basedir = snakemake.params.basedir
 
