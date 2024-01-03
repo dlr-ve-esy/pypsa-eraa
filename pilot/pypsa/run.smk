@@ -1,5 +1,14 @@
 configfile: "pypsa/pypsa_config.yaml"
 
+DDIR = RESOURCE_PATH + 'climatic/'
+ALLSAMPLES = ['pilot'] + CLIMATICDATASOURCES
+
+wildcard_constraints:
+    cds = ['ninja', 'Reading'],#CLIMATICDATASOURCES,
+#    sample = ['pilot'] + CLIMATICDATASOURCES,
+    target_year = "(\d{4})",
+    simulation_year = "(\d{4})"
+
 rule prepare_networks:
     input:
         link_specs_HVAC = PEMMDB_PATH + 'TY{target_year}/links_technical_HVAC.csv',
@@ -44,7 +53,7 @@ rule add_hydro:
     script:
         'scripts/pilot_add_hydro.py'
 
-rule simplify_network:
+rule simplify_pilot:
     input:
         'pypsa/networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc'
     output:
@@ -52,10 +61,34 @@ rule simplify_network:
     script:
         'scripts/pilot_simplify_network.py'
 
-rule solve_network:
+rule solve_pilot:
     input:
         'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
     output:
         'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
+    resources:
+        mem_mb='50GB',
+        runtime='12h'
     script:
-        'scripts/pilot_solve_network.py'
+        'scripts/solve_pilot.py'
+
+rule replace_p_max_pu:
+    input:
+        network='pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
+        cf_basedir=DDIR,
+    output:
+        'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
+    script:
+        'scripts/replace_p_max_pu.py'
+
+rule solve_climatic:
+    input:
+        pilot = 'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
+        network = 'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
+    output:
+        'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
+    resources:
+        mem_mb='50GB',
+        runtime='12h'
+    script:
+        'scripts/solve_climatic.py'

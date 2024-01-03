@@ -71,9 +71,11 @@ def define_stores(network, config, capacities=None, sus_energy=None):
             if carrier in storage_soc_initial.keys():
                 e_initial_per_period = True
                 e_initial = storage_soc_initial[carrier] / 100 * e_nom
+                e_cyclic = False
             else:
                 e_initial_per_period = False
                 e_initial = 0.
+                e_cyclic = True
             
             network.add(
                 'Store',
@@ -82,7 +84,8 @@ def define_stores(network, config, capacities=None, sus_energy=None):
                 carrier = carrier_short,
                 e_nom = e_nom,
                 e_initial = e_initial,
-                e_initial_per_period = e_initial_per_period
+                e_initial_per_period = e_initial_per_period,
+                e_cyclic = e_cyclic
             )
     
             ### dispatch_link

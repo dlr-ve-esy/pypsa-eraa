@@ -67,7 +67,7 @@ def add_hydro_constraints(network, config):
             disp_links = network.links.index[network.links.bus0.isin(hydro_sus.name_short)]
             max_disp_pu = limits / network.links.set_index(network.links.bus0).p_nom[limits.columns]
             max_disp_pu.columns = [c+' dispatch' for c in max_disp_pu.columns]
-            network.links_t.p_max_pu[disp_links] = max_disp_pu.clip(upper=1.)
+            network.links_t.p_max_pu.loc[:,max_disp_pu.columns] = max_disp_pu.clip(upper=1.)
     
         elif constraint == 'Maximum Generation MW':
             ### set p_max_pu of dispatching link
@@ -77,13 +77,13 @@ def add_hydro_constraints(network, config):
             max_disp_pu.columns = [c+' dispatch' for c in max_disp_pu.columns]
 
             # if link is already in p_max_pu, set p_max_pu to minimum of both constraints.
-            existing_p_max_pu = network.links_t.p_max_pu
+            existing_p_max_pu = network.links_t.p_max_pu.reindex(columns=disp_links).fillna(max_disp_pu)
             max_disp_pu = max_disp_pu.where(
-                max_disp_pu.reindex(columns=existing_p_max_pu.columns, fill_value=1.) < existing_p_max_pu, 
-                existing_p_max_pu
-            ).fillna(max_disp_pu)
+                max_disp_pu < existing_p_max_pu[max_disp_pu.columns], 
+                existing_p_max_pu[max_disp_pu.columns]
+            )
             
-            network.links_t.p_max_pu[disp_links] = max_disp_pu.clip(upper=1.)
+            network.links_t.p_max_pu.loc[:,max_disp_pu.columns] = max_disp_pu.clip(upper=1.)
 
         elif constraint == 'Maximum Pumping MW':
             ### set p_max_pu of storing link
@@ -93,13 +93,13 @@ def add_hydro_constraints(network, config):
             max_store_pu.columns = [c+' store' for c in max_store_pu.columns]
 
             # if link is already in p_max_pu, set p_max_pu to minimum of both constraints.
-            existing_p_max_pu = network.links_t.p_max_pu
+            existing_p_max_pu = network.links_t.p_max_pu.reindex(columns=store_links).fillna(max_store_pu)
             max_store_pu = max_store_pu.where(
-                max_store_pu.reindex(columns=existing_p_max_pu.columns, fill_value=1.) < existing_p_max_pu, 
-                existing_p_max_pu
-            ).fillna(max_store_pu)
+                max_store_pu < existing_p_max_pu[max_store_pu.columns],
+                existing_p_max_pu[max_store_pu.columns]
+            )
 
-            network.links_t.p_max_pu[store_links] = max_store_pu.clip(upper=1.)
+            network.links_t.p_max_pu.loc[:,max_store_pu.columns] = max_store_pu.clip(upper=1.)
     
         elif constraint == 'Maximum Reservoir level, historical (ratio)':
             ### set e_max_pu of store
@@ -113,7 +113,7 @@ def add_hydro_constraints(network, config):
             min_disp_pu = limits / network.links.set_index(network.links.bus0).p_nom[limits.columns]
             min_disp_pu.columns = [c+' dispatch' for c in min_disp_pu.columns]
 
-            network.links_t.p_min_pu[disp_links] = min_disp_pu.clip(upper=1.)
+            network.links_t.p_min_pu.loc[:,min_disp_pu.columns] = min_disp_pu.clip(upper=1.)
     
         elif constraint == 'Minimum Generation MW':
             ### set p_min_pu of dispatching link
@@ -123,31 +123,31 @@ def add_hydro_constraints(network, config):
             min_disp_pu.columns = [c+' dispatch' for c in min_disp_pu.columns]
 
             # if link is already in p_min_pu, set p_min_pu to maximum of both constraints.
-            existing_p_min_pu = network.links_t.p_min_pu
+            existing_p_min_pu = network.links_t.p_min_pu.reindex(columns=disp_links).fillna(min_disp_pu)
             min_disp_pu = min_disp_pu.where(
-                min_disp_pu.reindex(columns=existing_p_min_pu.columns, fill_value=0.) > existing_p_min_pu, 
-                existing_p_min_pu
-            ).fillna(min_disp_pu)
+                min_disp_pu > existing_p_min_pu[min_disp_pu.columns], 
+                existing_p_min_pu[min_disp_pu.columns]
+            )
             
-            network.links_t.p_min_pu[disp_links] = min_disp_pu.clip(upper=1.)
+            network.links_t.p_min_pu.loc[:,min_disp_pu.columns] = min_disp_pu.clip(upper=1.)
 
         elif constraint == 'Minimum Reservoir level, historical (ratio)':
             ### set e_min_pu of store
             network.stores_t.e_min_pu[limits.columns] = limits
 
-            e_initial = limits.iloc[0,:] * network.stores.e_nom[limits.columns]
-            network.stores.loc[limits.columns, 'e_initial'] = e_initial
-            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
-            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
+#            e_initial = limits.iloc[0,:] * network.stores.e_nom[limits.columns]
+#            network.stores.loc[limits.columns, 'e_initial'] = e_initial
+#            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
+#            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
     
         elif constraint == 'Minimum Reservoir level, technical (ratio)':
             ### set e_min_pu of store
             network.stores_t.e_min_pu[limits.columns] = limits
 
-            e_initial = limits.iloc[0,:] * network.stores.e_nom[limits.columns]
-            network.stores.loc[limits.columns, 'e_initial'] = e_initial
-            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
-            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
+#            e_initial = limits.iloc[0,:] * network.stores.e_nom[limits.columns]
+#            network.stores.loc[limits.columns, 'e_initial'] = e_initial
+#            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
+#            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
     
         elif constraint == 'Reservoir level at beginning of week (ratio)':
             ### e_max_pu = e_min_pu at beginning of week
@@ -156,14 +156,17 @@ def add_hydro_constraints(network, config):
             network.stores_t.e_min_pu[e_min_pu.columns] = e_min_pu
             network.stores_t.e_max_pu[e_max_pu.columns] = e_max_pu
 
-            e_initial = limits.iloc[0,:] * network.stores.e_nom[limits.columns]
-            network.stores.loc[limits.columns, 'e_initial'] = e_initial
-            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
-            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
+#            e_initial = limits.iloc[0,:] * network.stores.e_nom[limits.columns]
+#            network.stores.loc[limits.columns, 'e_initial'] = e_initial
+#            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
+#            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
+
+        else:
+            print(f'Warning from add_hydro.py: hydro constraint not specified for constraint = {constraint}')
 
         # The following constraints are not modeled in ERAA 2022
-        if false:
-            elif constraint == 'Maximum Pumped Energy MWh per week':
+        if False:
+            if constraint == 'Maximum Pumped Energy MWh per week':
                 ### Limits have been equally distributed to hours within week
                 ### set p_max_pu of storing link
         
@@ -196,9 +199,6 @@ def add_hydro_constraints(network, config):
                 ).fillna(min_store_pu)
                 
                 network.links_t.p_min_pu[store_links] = min_store_pu.clip(upper=1.)
-    
-        else:
-            print(f'Warning from add_hydro.py: hydro constraint not specified for constraint = {constraint}')
 
 def check_consistency(network, strategy='min_over_max'):
     ### check consistency of hydro constraints (partly taken from pypsa.components.consistency_check)

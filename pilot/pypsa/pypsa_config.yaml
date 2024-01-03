@@ -1,10 +1,3 @@
-scenario:
-    target_years: [2030]
-    simulation_years: [2010]
-
-io:
-    databasedir: '/srv/ES2050/ensym/DestinE/ERAA/'
-
 transmission:
     link_types: ['HVAC', 'HVDC']
 
@@ -75,10 +68,13 @@ carriers_short_names:
     Solar (Thermal): CSP
 
 solve:
-    lopf_kwargs:
-        solver_name: 'glpk'
-        #keep_files:
-        #solver_dir
+    solver_name: 'gurobi'
     solver_options:
-        #logPath: 'solver.log'
-        #solver_options:
+        method: 2
+        crossover: 0
+        threads: 4
+        BarConvTol: 1.e-6
+        Seed: 123
+        AggFill: 0
+        PreDual: 0
+        GURO_PAR_BARDENSETHRESH: 200
