@@ -1,11 +1,12 @@
+import glob
+
 configfile: "pypsa/pypsa_config.yaml"
 
 DDIR = RESOURCE_PATH + 'climatic/'
-ALLSAMPLES = ['pilot'] + CLIMATICDATASOURCES
 
 wildcard_constraints:
-    cds = ['ninja', 'Reading'],#CLIMATICDATASOURCES,
-#    sample = ['pilot'] + CLIMATICDATASOURCES,
+    CDS = "|".join(CLIMATICDATASOURCES),
+    ALT = "|".join(config['PECD_alternatives']['include']),
     target_year = "(\d{4})",
     simulation_year = "(\d{4})"
 
@@ -81,6 +82,18 @@ rule replace_p_max_pu:
     script:
         'scripts/replace_p_max_pu.py'
 
+rule replace_PECD_onwind:
+    input:
+        network='pypsa/networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc',
+        cf_basedir=DDIR+'PECD_alternatives/PECD2021_{ALT}/'
+    output:
+        'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
+    resources:
+        mem_mb='20GB',
+        runtime='1h'
+    script:
+        'scripts/replace_PECD.py'
+
 rule solve_climatic:
     input:
         pilot = 'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
@@ -92,3 +105,15 @@ rule solve_climatic:
         runtime='12h'
     script:
         'scripts/solve_climatic.py'
+
+rule solve_PECD_alternatives:
+    input:
+        pilot = 'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
+        network = 'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
+    output:
+        'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
+    resources:
+        mem_mb='50GB',
+        runtime='12h'
+    script:
+        'scripts/solve_PECD_alternatives.py'

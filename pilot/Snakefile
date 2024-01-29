@@ -1,8 +1,11 @@
+import glob
+
 configfile: "main_config.yaml"
 inputs = []
 
 TARGETYEARS = config['scenario']['target_years']
 CLIMATICDATASOURCES = config['climatic_data_sources']
+PECDALTERNATIVES = config['PECD_alternatives']['include']
 ALL_CLIMATICYEARS = range(config['scenario']['climatic_year_from'], config['scenario']['climatic_year_to'])
 SIMULATIONYEARS = config['scenario']['climatic_years']
 
@@ -39,7 +42,11 @@ if config['model'] == 'pypsa':
         odir = 'pypsa/networks/'
     if CLIMATICDATASOURCES:
         inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
-    else:
+    if PECDALTERNATIVES:
+#        idirs = sorted(glob.glob(config['PECD_alternatives']['dir']+'PECD2021*'))
+#        ALTERNATIVES = [idir.split('PECD2021_')[-1] for idir in idirs]
+        inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{alt}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, alt=PECDALTERNATIVES))
+    if not CLIMATICDATASOURCES and not PECDALTERNATIVES:
         inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
 
 if config['model'] == 'remix':

@@ -9,6 +9,10 @@ climatic_data_sources: [ # climatic data source additionally to PECD \in ['Readi
     'Reading'
 ]
 
+PECD_alternatives:
+    include: ['Existing', 'SP199_HH100_A', 'SP199_HH100_B', 'SP199_HH100_C', 'SP199_HH150_A', 'SP199_HH150_B', 'SP199_HH150_C', 'SP199_HH200_A', 'SP199_HH200_B', 'SP199_HH200_C']
+    dir: 'resources/climatic/PECD_alternatives/'
+
 solve:
     solve: true
 
