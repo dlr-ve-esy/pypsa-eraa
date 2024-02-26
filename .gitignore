@@ -7,6 +7,10 @@
 **/.snakemake
 pilot/resources/climatic/*/CY*
 pilot/resources/climatic/*/raw
+pilot/resources/climatic/PECD_alternatives
 pilot/resources/PEMMDB/TY*
 pilot/resources/climatic/PECD/TY*
 pilot/resources/raw/*
+pilot/pypsa/results/
+pilot/pypsa/pypsa_experiment_status.csv
+pilot/pypsa_experiment_status.csv
