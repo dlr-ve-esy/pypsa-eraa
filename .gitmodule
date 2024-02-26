@@ -1,0 +1,3 @@
+[submodule "eraa-resources"]
+  path = resources
+  url = ../eraa-resources.git
