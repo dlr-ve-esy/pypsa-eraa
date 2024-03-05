@@ -15,11 +15,12 @@ if SIMULATIONYEARS == 'all':
     except:
         print('When climatic_years = "all", climatic_year_from and climatic_year_to must be specified')
 
-RESOURCE_PATH = "resources/"
-MODEL_PATH = config['model'] + "/"
+RESOURCE_PATH = "resources/" + config['scenario']['eraa_version'] + "/"
+MODEL_PATH = "pypsa-eraa/"
 DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
 PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
-PECD_PATH = RESOURCE_PATH + 'climatic/PECD/'
+CLIMATIC_PATH = RESOURCE_PATH + "climatic/"
+PECD_PATH = CLIMATIC_PATH + 'PECD/'
 
 wildcard_constraints:
     cds = CLIMATICDATASOURCES,
@@ -29,29 +30,27 @@ wildcard_constraints:
 include: PEMMDB_PATH + "prepare.smk"
 include: PECD_PATH + 'prepare.smk'
 include: MODEL_PATH + "run.smk"
-include: RESOURCE_PATH + 'climatic/retrieve_climate_data.smk'
+include: CLIMATIC_PATH + 'retrieve_climate_data.smk'
 
 ### build pilot(s) with PEEMDB + PECD and collect additional data sources (if applicable)
-if CLIMATICDATASOURCES:
-    inputs.extend(expand(RESOURCE_PATH + "climatic/{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS))
+#if CLIMATICDATASOURCES:
+#    inputs.extend(expand(RESOURCE_PATH + "climatic/{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS))
 
-if config['model'] == 'pypsa':
-    if config['solve']['solve']:
-        odir = 'pypsa/results/'
-    else:
-        odir = 'pypsa/networks/'
-    if CLIMATICDATASOURCES:
-        inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
-    if PECDALTERNATIVES:
+if config['solve']['solve']:
+    odir = MODEL_PATH + "results/"
+else:
+    odir = MODEL_PATH + "networks/"
+
+if CLIMATICDATASOURCES:
+    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
+
+if PECDALTERNATIVES:
 #        idirs = sorted(glob.glob(config['PECD_alternatives']['dir']+'PECD2021*'))
 #        ALTERNATIVES = [idir.split('PECD2021_')[-1] for idir in idirs]
-        inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{alt}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, alt=PECDALTERNATIVES))
-    if not CLIMATICDATASOURCES and not PECDALTERNATIVES:
-        inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
+    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{alt}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, alt=PECDALTERNATIVES))
 
-if config['model'] == 'remix':
-    inputs.extend(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/commodity_balance_annual.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
-    inputs.extend(expand(MODEL_PATH + "results/TY{TY}/CY{CY}/slack_commodity_balance.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS)),
+if not CLIMATICDATASOURCES and not PECDALTERNATIVES:
+    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS))
 
 rule run_all:
     input: inputs
@@ -62,13 +61,3 @@ rule preprocess_input_data:
         expand(PECD_PATH + "TY{TY}/CY{CY}/hydro_inflow_timeseries.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
         expand(PECD_PATH + "TY{TY}/CY{CY}/demand_timeseries.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
         expand(PECD_PATH + "TY{TY}/CY{CY}/generation_vre_timeseries.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
-
-rule prepare_remix_model:
-    input:
-        inputs,
-        expand(MODEL_PATH + "modeldata/TY{TY}/CY{CY}/final_model/converter_coefficient.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),
-
-rule remix_hydro_constraints:
-    input:
-        inputs,
-        expand(MODEL_PATH + "modeldata/TY{TY}/CY{CY}/hyrdo_constraints/storage_levelprofile.csv", TY=TARGETYEARS, CY=SIMULATIONYEARS),

@@ -1,19 +1,18 @@
 scenario:
-    climatic_years: 'all' # either list of years or 'all'. If 'all' climatic_year_from/to must be given
+    eraa_version: '2022' # possible versions 2022, 2023
+    climatic_years: [2000] # either list of years or 'all'. If 'all' climatic_year_from/to must be given
     target_years: [2030] #, 2030]
     climatic_year_from: 1985
     climatic_year_to: 2016
 
 climatic_data_sources: [ # climatic data source additionally to PECD \in ['Reading', 'ninja']
-    "ninja",
+#    "ninja",
     'Reading'
 ]
 
 PECD_alternatives:
-    include: ['Existing', 'SP199_HH100_A', 'SP199_HH100_B', 'SP199_HH100_C', 'SP199_HH150_A', 'SP199_HH150_B', 'SP199_HH150_C', 'SP199_HH200_A', 'SP199_HH200_B', 'SP199_HH200_C']
-    dir: 'resources/climatic/PECD_alternatives/'
+    include: [] #['Existing', 'SP199_HH100_A', 'SP199_HH100_B', 'SP199_HH100_C', 'SP199_HH150_A', 'SP199_HH150_B', 'SP199_HH150_C', 'SP199_HH200_A', 'SP199_HH200_B', 'SP199_HH200_C']
+    dir: '' #'resources/climatic/PECD_alternatives/'
 
 solve:
-    solve: true
-
-model: pypsa
+    solve: false
