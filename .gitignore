@@ -5,6 +5,7 @@
 **/*.png
 **/Untitled*.ipynb
 **/.snakemake
+**/.nfs*
 pilot/resources/climatic/*/CY*
 pilot/resources/climatic/*/raw
 pilot/resources/climatic/PECD_alternatives
