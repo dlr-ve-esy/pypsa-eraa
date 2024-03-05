@@ -1,6 +1,6 @@
 import glob
 
-configfile: "pypsa/pypsa_config.yaml"
+configfile: MODEL_PATH+"pypsa_config.yaml"
 
 DDIR = RESOURCE_PATH + 'climatic/'
 
@@ -18,7 +18,7 @@ rule prepare_networks:
         link_p_max_pu_HVDC = PEMMDB_PATH + 'TY{target_year}/links_timeseries_HVDC.csv',
         bus_locations = RESOURCE_PATH + 'bus_locations.csv'
     output:
-        'pypsa/networks/pilot_base_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_base_TY{target_year}_{simulation_year}.nc'
     script:
         'scripts/pilot_prepare_network.py'
 
@@ -29,44 +29,44 @@ rule add_electricity:
         storage_technical = PEMMDB_PATH + 'TY{target_year}/storage_technical.csv',
         demand_timeseries = PECD_PATH + 'TY{target_year}/CY{simulation_year}/demand_timeseries.csv'
     output:
-        'pypsa/networks/pilot_elec_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_elec_TY{target_year}_{simulation_year}.nc'
     script:
         'scripts/pilot_add_electricity.py'
 
 rule add_vre:
     input:
-        network = 'pypsa/networks/pilot_elec_TY{target_year}_{simulation_year}.nc',
+        network = MODEL_PATH + 'networks/pilot_elec_TY{target_year}_{simulation_year}.nc',
         generation_vre_timeseries = PECD_PATH + 'TY{target_year}/CY{simulation_year}/generation_vre_timeseries.csv',
         hydro_inflow_timeseries = PECD_PATH + 'TY{target_year}/CY{simulation_year}/hydro_inflow_timeseries.csv',
     output:
-        'pypsa/networks/pilot_elec-vre_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre_TY{target_year}_{simulation_year}.nc'
     script:
         'scripts/pilot_add_vre_profiles.py'
 
 rule add_hydro:
     input:
-        network = 'pypsa/networks/pilot_elec-vre_TY{target_year}_{simulation_year}.nc',
+        network = MODEL_PATH + 'networks/pilot_elec-vre_TY{target_year}_{simulation_year}.nc',
         hydro_inflow_timeseries = PECD_PATH + 'TY{target_year}/CY{simulation_year}/hydro_inflow_timeseries.csv',
     params:
         basedir = PECD_PATH + 'TY{target_year}/'
     output:
-        'pypsa/networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc'
     script:
         'scripts/pilot_add_hydro.py'
 
 rule simplify_pilot:
     input:
-        'pypsa/networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc'
     output:
-        'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
     script:
         'scripts/pilot_simplify_network.py'
 
 rule solve_pilot:
     input:
-        'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
     output:
-        'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
+        MODEL_PATH + 'results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc'
     resources:
         mem_mb='50GB',
         runtime='12h'
@@ -75,19 +75,20 @@ rule solve_pilot:
 
 rule replace_p_max_pu:
     input:
-        network='pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
+        network=MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
         cf_basedir=DDIR,
+        replace_by=DDIR + '{CDS}/CY{simulation_year}/generation_vre_timeseries.csv',
     output:
-        'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
     script:
         'scripts/replace_p_max_pu.py'
 
 rule replace_PECD_onwind:
     input:
-        network='pypsa/networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc',
+        network=MODEL_PATH + 'networks/pilot_elec-vre-hydro_TY{target_year}_{simulation_year}.nc',
         cf_basedir=DDIR+'PECD_alternatives/PECD2021_{ALT}/'
     output:
-        'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
+        MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
     resources:
         mem_mb='20GB',
         runtime='1h'
@@ -96,10 +97,10 @@ rule replace_PECD_onwind:
 
 rule solve_climatic:
     input:
-        pilot = 'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
-        network = 'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
+        pilot = MODEL_PATH + 'results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
+        network = MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
     output:
-        'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
+        MODEL_PATH + 'results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{CDS}.nc'
     resources:
         mem_mb='50GB',
         runtime='12h'
@@ -108,10 +109,10 @@ rule solve_climatic:
 
 rule solve_PECD_alternatives:
     input:
-        pilot = 'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
-        network = 'pypsa/networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
+        pilot = MODEL_PATH + 'results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}.nc',
+        network = MODEL_PATH + 'networks/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
     output:
-        'pypsa/results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
+        MODEL_PATH + 'results/pilot_elec-vre-hydro_simpl_TY{target_year}_{simulation_year}_{ALT}.nc'
     resources:
         mem_mb='50GB',
         runtime='12h'
