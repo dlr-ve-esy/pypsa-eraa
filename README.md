@@ -12,6 +12,10 @@ This repository is maintained by the [German Aerospace Center](https://dlr.de/ve
 
 Please respect our [code of conduct](CODE_OF_CONDUCT.md).
 
+## Acknowledgements
+
+The initial version of pypsa-eraa has been developed for the *Destination Earth Use Case Energy Systems*, a joint activity of DLR, Aarhus University and the Renewables Grid Initiative in support of ECMWF's role in Destination Earth funded by the European Commission.
+
 ## License
 
 Copyright (c) 2023-2024 DLR
