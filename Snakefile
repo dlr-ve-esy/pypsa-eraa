@@ -21,6 +21,7 @@ DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
 PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
 CLIMATIC_PATH = RESOURCE_PATH + "climatic/"
 PECD_PATH = CLIMATIC_PATH + 'PECD/'
+CDS_PATH = "resources/cds/"
 
 wildcard_constraints:
     cds = CLIMATICDATASOURCES,
@@ -30,19 +31,17 @@ wildcard_constraints:
 include: PEMMDB_PATH + "prepare.smk"
 include: PECD_PATH + 'prepare.smk'
 include: "pypsa-eraa/run.smk" #MODEL_PATH + "run.smk"
-#include: CLIMATIC_PATH + 'retrieve_climate_data.smk'
+include: CDS_PATH + 'retrieve_climate_data.smk'
 
 ### build pilot(s) with PEEMDB + PECD and collect additional data sources (if applicable)
-#if CLIMATICDATASOURCES:
-#    inputs.extend(expand(RESOURCE_PATH + "climatic/{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS))
-
 if config['solve']['solve']:
     odir = MODEL_PATH + "results/"
 else:
     odir = MODEL_PATH + "networks/"
 
-#if CLIMATICDATASOURCES:
-#    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
+if CLIMATICDATASOURCES:
+    inputs.extend(expand(CDS_PATH + "{CDS}/CY{SY}/generation_vre_timeseries.csv", CDS=CLIMATICDATASOURCES, SY=SIMULATIONYEARS))
+    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
 
 if PECDALTERNATIVES:
 #        idirs = sorted(glob.glob(config['PECD_alternatives']['dir']+'PECD2021*'))
