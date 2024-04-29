@@ -1,13 +1,13 @@
 scenario:
-    eraa_version: '2022' # possible versions 2022, 2023
-    climatic_years: [2000] # either list of years or 'all'. If 'all' climatic_year_from/to must be given
+    eraa_version: '2023' # possible versions 2022, 2023
+    climatic_years: [2000, 2010] # either list of years or 'all'. If 'all' climatic_year_from/to must be given
     target_years: [2030] #, 2030]
-    climatic_year_from: 1985
-    climatic_year_to: 2016
+    climatic_year_from: 1982
+    climatic_year_to: 2017
 
 climatic_data_sources: [ # climatic data source additionally to PECD \in ['Reading', 'ninja']
 #    "ninja",
-    'Reading'
+#    'Reading'
 ]
 
 PECD_alternatives:
@@ -15,4 +15,4 @@ PECD_alternatives:
     dir: '' #'resources/climatic/PECD_alternatives/'
 
 solve:
-    solve: false
+    solve: true

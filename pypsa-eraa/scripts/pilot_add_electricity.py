@@ -89,13 +89,19 @@ def define_stores(network, config, capacities=None, sus_energy=None):
             )
     
             ### dispatch_link
+            if name not in sus_p_nom_disp.index:
+                print(f'Warning store {name} has turbining power of 0.')
+                p_nom_disp = 0.
+            else:
+                p_nom_disp = sus_p_nom_disp[name]
+                
             network.add(
                 'Link',
                 f'{name_short} dispatch',
                 bus0 = name_short,
                 bus1 = node,
                 efficiency = sus_efficiencies.dispatch[carrier],
-                p_nom = sus_p_nom_disp[name],
+                p_nom = p_nom_disp,
                 carrier = f'{carrier_short} dispatch'
             )
     

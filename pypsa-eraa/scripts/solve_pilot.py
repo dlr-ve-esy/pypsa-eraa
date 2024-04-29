@@ -49,7 +49,7 @@ def solve_network(network, snapshots, solver_name='glpk', solver_options={}):
     network.links_t.p_max_pu['NON1 OLPHS dispatch'].fillna(method='ffill', inplace=True)
     network.links_t.p_max_pu['NOS0 OLPHS dispatch'].fillna(method='ffill', inplace=True)
     
-    network.stores_t.e_max_pu['NO OLPHS OLPHS'][-48:] = network.stores_t.e_max_pu['NO OLPHS OLPHS'][-50]
+#    network.stores_t.e_max_pu['NO OLPHS OLPHS'][-48:] = network.stores_t.e_max_pu['NO OLPHS OLPHS'][-50]
     
     sol = network.optimize(snapshots, solver_name=solver_name, solver_options=solver_options, assign_all_duals=True)
 
@@ -65,7 +65,7 @@ if __name__ == "__main__":
     nf = snakemake.input[0]
     network = pypsa.Network(nf)    
     add_shedding(network)
-    network.remove('Link', 'LUB1-BE00 HVAC')
+#    network.remove('Link', 'LUB1-BE00 HVAC')
     speed_up(network)
     
     status['status'] = ['running']

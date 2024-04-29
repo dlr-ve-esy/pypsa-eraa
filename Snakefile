@@ -16,7 +16,7 @@ if SIMULATIONYEARS == 'all':
         print('When climatic_years = "all", climatic_year_from and climatic_year_to must be specified')
 
 RESOURCE_PATH = "resources/" + config['scenario']['eraa_version'] + "/"
-MODEL_PATH = "pypsa-eraa/"
+MODEL_PATH = "pypsa-eraa/" + config['scenario']['eraa_version'] + "/"
 DOWNLOAD_PATH = RESOURCE_PATH + "raw/"
 PEMMDB_PATH = RESOURCE_PATH + "PEMMDB/"
 CLIMATIC_PATH = RESOURCE_PATH + "climatic/"
@@ -29,8 +29,8 @@ wildcard_constraints:
 
 include: PEMMDB_PATH + "prepare.smk"
 include: PECD_PATH + 'prepare.smk'
-include: MODEL_PATH + "run.smk"
-include: CLIMATIC_PATH + 'retrieve_climate_data.smk'
+include: "pypsa-eraa/run.smk" #MODEL_PATH + "run.smk"
+#include: CLIMATIC_PATH + 'retrieve_climate_data.smk'
 
 ### build pilot(s) with PEEMDB + PECD and collect additional data sources (if applicable)
 #if CLIMATICDATASOURCES:
@@ -41,8 +41,8 @@ if config['solve']['solve']:
 else:
     odir = MODEL_PATH + "networks/"
 
-if CLIMATICDATASOURCES:
-    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
+#if CLIMATICDATASOURCES:
+#    inputs.extend(expand(odir+'pilot_elec-vre-hydro_simpl_TY{TY}_{SY}_{cds}.nc', TY=TARGETYEARS, SY=SIMULATIONYEARS, cds=CLIMATICDATASOURCES))
 
 if PECDALTERNATIVES:
 #        idirs = sorted(glob.glob(config['PECD_alternatives']['dir']+'PECD2021*'))

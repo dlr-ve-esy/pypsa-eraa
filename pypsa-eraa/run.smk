@@ -1,6 +1,6 @@
 import glob
 
-configfile: MODEL_PATH+"pypsa_config.yaml"
+configfile: "pypsa-eraa/pypsa_config.yaml"
 
 DDIR = RESOURCE_PATH + 'climatic/'
 
@@ -16,7 +16,7 @@ rule prepare_networks:
         link_specs_HVDC = PEMMDB_PATH + 'TY{target_year}/links_technical_HVDC.csv',
         link_p_max_pu_HVAC = PEMMDB_PATH + 'TY{target_year}/links_timeseries_HVAC.csv',
         link_p_max_pu_HVDC = PEMMDB_PATH + 'TY{target_year}/links_timeseries_HVDC.csv',
-        bus_locations = RESOURCE_PATH + 'bus_locations.csv'
+        bus_locations = 'pypsa-eraa/resources/bus_locations.csv'
     output:
         MODEL_PATH + 'networks/pilot_base_TY{target_year}_{simulation_year}.nc'
     script:
@@ -24,7 +24,7 @@ rule prepare_networks:
 
 rule add_electricity:
     input:
-        network = 'pypsa/networks/pilot_base_TY{target_year}_{simulation_year}.nc',
+        network = MODEL_PATH + 'networks/pilot_base_TY{target_year}_{simulation_year}.nc',
         generation_technical = PEMMDB_PATH + 'TY{target_year}/generation_technical.csv',
         storage_technical = PEMMDB_PATH + 'TY{target_year}/storage_technical.csv',
         demand_timeseries = PECD_PATH + 'TY{target_year}/CY{simulation_year}/demand_timeseries.csv'
