@@ -5,8 +5,8 @@ configfile: "pypsa-eraa/pypsa_config.yaml"
 DDIR = RESOURCE_PATH + 'climatic/'
 
 wildcard_constraints:
-    CDS = "|".join(CLIMATICDATASOURCES),
-    ALT = "|".join(config['PECD_alternatives']['include']),
+    CDS = f'r({"|".join(CLIMATICDATASOURCES)})',
+    ALT = f'r({"|".join(PECDALTERNATIVES)})',
     target_year = "(\d{4})",
     simulation_year = "(\d{4})"
 

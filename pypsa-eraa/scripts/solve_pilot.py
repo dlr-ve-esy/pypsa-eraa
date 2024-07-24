@@ -40,16 +40,18 @@ def speed_up(network):
 def solve_network(network, snapshots, solver_name='glpk', solver_options={}):
 
     ### p_min_pu of dispatch links may cause infeasibilities when inflow is insufficient to serve the minimum dispatch requirement and stores energy is bounded by e_min_pu
-    disp_links = network.links.index[network.links.carrier.isin(['hydro dispatch', 'OLPHS dispatch', 'CLPHS dispatch'])]
-    disp_links = disp_links[disp_links.isin(network.links_t.p_min_pu.columns)]
-    network.links_t.p_min_pu[disp_links] = 0 ### solves!
+    disp_links = network.links.index[network.links.carrier.isin(['CLPHS dispatch'])] #'hydro dispatch', 'OLPHS dispatch'])]
+    disp_links_lower = disp_links[disp_links.isin(network.links_t.p_min_pu.columns)]
+    network.links_t.p_min_pu[disp_links_lower] = 0
 
-    ### fill NaNs at end of time series for NO stores
-    network.links_t.p_max_pu['NOM1 OLPHS dispatch'].fillna(method='ffill', inplace=True)
-    network.links_t.p_max_pu['NON1 OLPHS dispatch'].fillna(method='ffill', inplace=True)
-    network.links_t.p_max_pu['NOS0 OLPHS dispatch'].fillna(method='ffill', inplace=True)
+    ### allow for flexibility in state of charge at beginning of week to avoid infeasibilities -> consider adding a penalty term to objective
+    network.stores_t.e_min_pu *= 0.8
+    network.stores_t.e_min_pu = (network.stores_t.e_min_pu * 1.1).clip(upper=1.)
     
-#    network.stores_t.e_max_pu['NO OLPHS OLPHS'][-48:] = network.stores_t.e_max_pu['NO OLPHS OLPHS'][-50]
+    ### fill NaNs at end of time series for NO stores
+#    network.links_t.p_max_pu['NOM1 OLPHS dispatch'].fillna(method='ffill', inplace=True)
+#    network.links_t.p_max_pu['NON1 OLPHS dispatch'].fillna(method='ffill', inplace=True)
+#    network.links_t.p_max_pu['NOS0 OLPHS dispatch'].fillna(method='ffill', inplace=True)
     
     sol = network.optimize(snapshots, solver_name=solver_name, solver_options=solver_options, assign_all_duals=True)
 
@@ -65,7 +67,6 @@ if __name__ == "__main__":
     nf = snakemake.input[0]
     network = pypsa.Network(nf)    
     add_shedding(network)
-#    network.remove('Link', 'LUB1-BE00 HVAC')
     speed_up(network)
     
     status['status'] = ['running']
@@ -84,7 +85,14 @@ if __name__ == "__main__":
     )
     network_solved.name = f'DestinE Pilot {sol[1]}'
 
+    if sol[1] != 'optimal':
+        network_solved.export_to_netcdf(snakemake.output[0].replace('.nc', '_infeasible.nc'))
+        dummy = pypsa.Network()
+        dummy.export_to_netcdf(snakemake.output[0])
+    else:
+        network_solved.export_to_netcdf(snakemake.output[0])
+
     status['status'] = sol[1]
     status.to_csv('pypsa_experiment_status.csv', mode='a', header=False, index=False)
 
-    network_solved.export_to_netcdf(snakemake.output[0])
+    

@@ -1,0 +1,23 @@
+constraint,component,attribute,direction,compute_pu
+Maximum Generated energy MWh per week,Link,p_max_pu,dispatch,True
+Maximum Generation MW,Link,p_max_pu,dispatch,True
+Maximum Pumping MW,Link,p_max_pu,store,True
+Maximum Reservoir level historical (ratio),Store,e_max_pu,,False
+Minimum Generated energy MWh per week,Link,p_min_pu,dispatch,True
+Minimum Generation MW,Link,p_min_pu,dispatch,True
+Minimum Reservoir level historical (ratio),Store,e_min_pu,,False
+Minimum Reservoir level technical (ratio),Store,e_min_pu,,False
+Reservoir level at beginning of week (ratio),Store,e,,False
+Maximum generated energy,Link,p_max_pu,dispatch,True
+Maximum generating power,Link,p_max_pu,dispatch,True
+Maximum pumped energy,Link,p_max_pu,store,True
+Maximum pumping power,Link,p_max_pu,store,True
+Maximum reservoir level technical,Store,e_max_pu,,False
+Maximum theoretical generated energy,Link,p_max_pu,dispatch,True
+Maximum theoretical pumped energy,Link,p_max_pu,store,True
+Minimum generated energy,Link,p_min_pu,dispatch,True
+Minimum generating power,Link,p_min_pu,dispatch,True
+Minimum pumped energy,Link,p_min_pu,store,True
+Minimum pumping power,Link,p_min_pu,store,True
+Minimum reservoir level technical,Store,e_min_pu,,False
+Reservoir level at beginning of day,Store,e,,False

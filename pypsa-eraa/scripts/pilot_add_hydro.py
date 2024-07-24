@@ -38,6 +38,75 @@ def add_inflows(network, config):
         p_max_pu = inflow / inflow.max(),
     )
 
+def constraints_from_rule(network, rule, bounds):
+
+    hydro_rules = pd.read_csv('pypsa-eraa/resources/hydro_rules.csv', header=0, index_col=0)
+
+    if rule not in hydro_rules.index:
+        print(f'Rule {rule} not defined, skipping')
+        
+    else:
+        c = hydro_rules.component[rule]
+        attr = hydro_rules.attribute[rule]
+        direction = hydro_rules.direction[rule]
+        sus = bounds.columns
+    
+        df = network.df(c)
+        pnl = network.pnl(c)
+    
+        if direction == 'dispatch':
+            idx = df.index[df.bus0.isin(sus)]
+            set_attr = 'bus0'
+        elif direction == 'store':
+            idx = df.index[df.bus1.isin(sus)]
+            set_attr = 'bus1'
+        else:
+            idx = sus
+    
+        if direction and hydro_rules.compute_pu[rule]:
+            bounds /= df.set_index(df[set_attr]).p_nom[sus]
+            bounds.columns = [f'{c} {direction}' for c in bounds.columns]
+            bounds = bounds.abs().clip(upper=1.)
+
+        if attr == 'e':
+            pnl['e_min_pu'].loc[:,bounds.columns] = bounds.fillna(0.)-0.01
+            pnl['e_max_pu'].loc[:,bounds.columns] = bounds.fillna(1.)+0.01
+        else:
+            # if component is already constraint, set bound to minimum of both constraints.
+            pnl = pnl[attr]
+            existing_bounds = pnl.reindex(columns=idx).fillna(bounds)
+            bounds = bounds.where(
+                bounds < existing_bounds[bounds.columns], 
+                existing_bounds[bounds.columns]
+            )
+            pnl.loc[:,bounds.columns] = bounds
+        
+        print((rule, bounds.mean()))
+
+def add_hydro_constraints_from_rules(network, config):
+
+    short_names = config['carriers_short_names']
+    basedir = snakemake.params.basedir
+
+    hydro_files = sorted(glob.glob(basedir+f'hydro_uniform_*.csv'))
+
+    for hydro_f in hydro_files[:17]:
+        limits = pd.read_csv(hydro_f, index_col=0, header=0)
+    
+        hydro_sus = pd.DataFrame(index=limits.columns)
+        hydro_sus['carrier'] = [c.split(' - ')[1] for c in limits.columns]
+        hydro_sus['carrier_short'] = hydro_sus['carrier'].map(short_names)
+        hydro_sus['node'] = [c.split(' - ')[0] for c in limits.columns]
+        hydro_sus['name_short'] = hydro_sus[['node', 'carrier_short']].agg(' '.join, axis=1)
+    
+        limits.columns = limits.columns.map(hydro_sus['name_short'])
+        limits.index = network.snapshots
+        limits.drop(limits.columns[~limits.columns.isin(network.stores.index)], axis=1, inplace=True)
+    
+        constraint = hydro_f.split('_')[-1][:-4]
+
+        constraints_from_rule(network, constraint, limits)
+
 def add_hydro_constraints(network, config):
 
     short_names = config['carriers_short_names']
@@ -131,7 +200,7 @@ def add_hydro_constraints(network, config):
             
             network.links_t.p_min_pu.loc[:,min_disp_pu.columns] = min_disp_pu.clip(upper=1.)
 
-        elif constraint == 'Minimum Reservoir level, historical (ratio)':
+        elif constraint == 'Minimum Reservoir level historical (ratio)':
             ### set e_min_pu of store
             network.stores_t.e_min_pu[limits.columns] = limits
 
@@ -140,7 +209,7 @@ def add_hydro_constraints(network, config):
 #            network.stores.loc[limits.columns, 'e_initial_per_period'] = True
 #            network.stores.loc[limits.columns, 'e_cyclic_per_period'] = False
     
-        elif constraint == 'Minimum Reservoir level, technical (ratio)':
+        elif constraint == 'Minimum Reservoir level technical (ratio)':
             ### set e_min_pu of store
             network.stores_t.e_min_pu[limits.columns] = limits
 
@@ -164,7 +233,7 @@ def add_hydro_constraints(network, config):
         else:
             print(f'Warning from add_hydro.py: hydro constraint not specified for constraint = {constraint}')
 
-        # The following constraints are not modeled in ERAA 2022
+        # The following constraints are not modeled in ERAA
         if False:
             if constraint == 'Maximum Pumped Energy MWh per week':
                 ### Limits have been equally distributed to hours within week
@@ -216,10 +285,11 @@ def check_consistency(network, strategy='min_over_max'):
 
 if __name__ == "__main__":
 
-    ### add electricity and export network
+    ### add hydro inflows and constraints and export network
     network = pypsa.Network(snakemake.input.network)
     add_inflows(network, snakemake.config)
-    add_hydro_constraints(network, snakemake.config)
+#    add_hydro_constraints(network, snakemake.config)
+    add_hydro_constraints_from_rules(network, snakemake.config)
     check_consistency(network)
     
     network.name = 'DestinE Pilot with VRE profiles and hydro'
